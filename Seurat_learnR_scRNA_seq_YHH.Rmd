@@ -1,0 +1,301 @@
+---
+title: "Seurat_learnR_scRNA_seq"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library(Seurat)
+library(patchwork)
+
+tutorial_options(exercise.timelimit = 120)
+knitr::opts_chunk$set(error = TRUE)
+```
+
+```{r setupA, include=FALSE}
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+```
+
+
+
+
+## Loading data
+
+```{r load_data, exercise = TRUE, exercise.eval = FALSE}
+# Load the PBMC dataset
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+pbmc
+```
+
+## Standard pre-processing workflow
+
+The steps below encompass the standard pre-processing workflow for scRNA-seq data in Seurat. These represent the selection and filtration of cells based on QC metrics, data normalization and scaling, and the detection of highly variable features.
+
+### QC and selecting cells for further analysis
+Seurat allows you to easily explore QC metrics and filter cells based on any user-defined criteria. A few QC metrics commonly used by the community include
+
+  - The number of unique genes detected in each cell.
+    - Low-quality cells or empty droplets will often have very few genes
+    - Cell doublets or multiplets may exhibit an aberrantly high gene count
+  - Similarly, the total number of molecules detected within a cell (correlates strongly with unique genes)
+  - The percentage of reads that map to the mitochondrial genome
+    - Low-quality / dying cells often exhibit extensive mitochondrial contamination
+    - We calculate mitochondrial QC metrics with the `PercentageFeatureSet` function, which calculates the percentage of counts originating from a set of features
+    - We use the set of all genes starting with `MT-` as a set of mitochondrial genes
+
+
+```{r add_columns, exercise = TRUE, exercise.setup="setupA",  exercise.eval = FALSE}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+
+mean(pbmc$percent.mt)
+```
+
+
+## Other QC metrics
+
+<summary>Where are QC metrics stored in Seurat?</summary>
+  In the example below, we visualize QC metrics, and use these to filter cells.
+    - We filter cells that have unique feature counts over 2,500 or less than 200
+    - We filter cells that have >5% mitochondrial counts
+```{r QC_metrics, exercise = TRUE, exercise.setup="setupA", exercise.eval = FALSE}
+# Visualize QC metrics as a violin plot
+VlnPlot(pbmc, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+```
+
+
+## Feature scatter plot
+```{r mt_percent, include = FALSE}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+```
+
+```{r scatter, exercise = TRUE, exercise.setup="mt_percent",  exercise.eval = FALSE}
+# FeatureScatter is typically used to visualize feature-feature relationships, but can be used
+# for anything calculated by the object, i.e. columns in object metadata, PC scores etc.
+plot1 <- FeatureScatter(pbmc, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 <- FeatureScatter(pbmc, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot1 + plot2
+```
+
+
+## Subset data using different criteria
+
+```{r subset, exercise = TRUE, exercise.setup="mt_percent",  exercise.eval = FALSE}
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+```
+
+```{r subset_final, include = FALSE}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+```
+
+
+## Identification of highly variable features (feature selection)
+
+```{r feature_selection, exercise = TRUE, exercise.setup="subset_final",  exercise.eval = FALSE}
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+
+# Identify the 10 most highly variable genes
+top10 <- head(VariableFeatures(pbmc), 10)
+
+# plot variable features with and without labels
+plot1 <- VariableFeaturePlot(pbmc)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot1 + plot2
+```
+
+```{r feature_selection_final, include = FALSE}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+```
+
+
+## Scaling the data
+Next, we apply a linear transformation ('scaling') that is a standard pre-processing step prior to dimensional reduction techniques like PCA. The ScaleData function:
+
+  - Shifts the expression of each gene, so that the mean expression across cells is 0
+  - Scales the expression of each gene, so that the variance across cells is 1
+    - This step gives equal weight in downstream analyses, so that highly-expressed genes do not dominate
+  - The results of this are stored in pbmc[["RNA"]]@scale.data
+  
+```{r scale, exercise = TRUE, exercise.setup="feature_selection_final",  exercise.eval = FALSE}
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
+```
+
+```{r scale_final, include = FALSE}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
+```
+
+
+
+## Perform linear dimensional reduction
+Next we perform PCA on the scaled data. By default, only the previously determined variable features are used as input, but can be defined using features argument if you wish to choose a different subset.
+
+```{r PCA, exercise = TRUE, exercise.setup="scale_final",  exercise.eval = FALSE}
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+```
+
+```{r PCA_final, include = FALSE}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+# Subset
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+
+# Scaling
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
+# PCA
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+```
+
+Seurat provides several useful ways of visualizing both cells and features that define the PCA, including `VizDimReduction`, `DimPlot`, and `DimHeatmap`
+
+### Check PCA results
+```{r PCA_results, exercise = TRUE, exercise.setup="PCA_final",  exercise.eval = FALSE}
+# Examine PCA results 
+print(pbmc[["pca"]], dims = 1:5, nfeatures = 5)
+```
+
+### Visualize PCA results
+```{r PCA_loading, exercise = TRUE, exercise.setup="PCA_final",  exercise.eval = FALSE}
+# Visualize PCA results - the vector loadings in the first 2 dimensions
+VizDimLoadings(pbmc, dims = 1:2, reduction = "pca")
+```
+
+### Dimention plot
+```{r PCA_dim, exercise = TRUE, exercise.setup="PCA_final",  exercise.eval = FALSE}
+### Visualize PCA results - Dimention plot
+DimPlot(pbmc, reduction = "pca")
+```
+
+
+### Heatmap
+```{r heatmap, exercise = TRUE, exercise.setup="PCA_final",  exercise.eval = FALSE}
+### Visualize PCA results against Gene expression (Only show the results for the 1st PC)
+DimHeatmap(pbmc, dims = 1, cells = 500, balanced = TRUE)
+```
+
+
+### Heatmap - Exercise
+How do you change the following code to plot the heatmaps for the first 15 PCs?
+
+```{r heatmapex1, exercise = TRUE}
+DimHeatmap(pbmc, dims = 1, cells = 500, balanced = TRUE)
+```
+
+```{r heatmapex1-solution, exercise = TRUE, exercise.setup="PCA_final",  exercise.eval = FALSE}
+### Visualize PCA results against Gene expression (results for the first 15 PCs)
+DimHeatmap(pbmc, dims = 1:15, cells = 500, balanced = TRUE)
+```
+
+<div id="heatmap_ex1-hint">
+**Hint:** Adjust`dim` to see the difference. 
+</div>
+
+## Determine the 'dimensionality' of the dataset
+To overcome the extensive technical noise in any single feature for scRNA-seq data, Seurat clusters cells based on their PCA scores, with each PC essentially representing a 'metafeature' that combines information across a correlated feature set. The top principal components therefore represent a robust compression of the dataset. However, how many componenets should we choose to include? 10? 20? 100?
+
+In Macosko et al, we implemented a resampling test inspired by the JackStraw procedure. We randomly permute a subset of the data (1% by default) and rerun PCA, constructing a 'null distribution' of feature scores, and repeat this procedure. We identify 'significant' PCs as those who have a strong enrichment of low p-value features.
+
+```{r PCA_dim_reduction, exercise = TRUE, exercise.setup="PCA_final",  exercise.eval = FALSE}
+# NOTE: This process can take a long time for big datasets, comment out for expediency. More
+# approximate techniques such as those implemented in ElbowPlot() can be used to reduce
+# computation time
+pbmc <- JackStraw(pbmc, num.replicate = 100)
+pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
+```
+
+```{r PCA_dim_reduction_final, include= FALSE}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+# Subset
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+
+# Scaling
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
+# PCA
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+# NOTE: This process can take a long time for big datasets, comment out for expediency. More
+# approximate techniques such as those implemented in ElbowPlot() can be used to reduce
+# computation time
+pbmc <- JackStraw(pbmc, num.replicate = 100)
+pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
+```
+
+
+
+### JackStrawPlot
+
+The JackStrawPlot function provides a visualization tool for comparing the distribution of p-values for each PC with a uniform distribution (dashed line). 'Significant' PCs will show a strong enrichment of features with low p-values (solid curve above the dashed line). In this case it appears that there is a sharp drop-off in significance after the first 10-12 PCs.
+
+```{r PCA_JS, exercise = TRUE, exercise.setup="PCA_dim_reduction_final",  exercise.eval = FALSE}
+JackStrawPlot(pbmc, dims = 1:15)
+```
+
+### ElbowPlot
+
+An alternative heuristic method generates an 'Elbow plot': a ranking of principle components based on the percentage of variance explained by each one (ElbowPlot function). In this example, we can observe an 'elbow' around PC9-10, suggesting that the majority of true signal is captured in the first 10 PCs.
+
+```{r PCA_elbow, exercise = TRUE, exercise.setup="PCA_dim_reduction_final",  exercise.eval = FALSE}
+ElbowPlot(pbmc)
+```
+
+### Dimension reduction - Conclusion
+
+Identifying the true dimensionality of a dataset -- can be challenging/uncertain for the user. We therefore suggest these three approaches to consider. The first is more supervised, exploring PCs to determine relevant sources of heterogeneity, and could be used in conjunction with GSEA for example. The second implements a statistical test based on a random null model, but is time-consuming for large datasets, and may not return a clear PC cutoff. The third is a heuristic that is commonly used, and can be calculated instantly. In this example, all three approaches yielded similar results, but we might have been justified in choosing anything between PC 7-12 as a cutoff.
+
+We chose 10 here, but encourage users to consider the following:
+
+Dendritic cell and NK aficionados may recognize that genes strongly associated with PCs 12 and 13 define rare immune subsets (i.e. MZB1 is a marker for plasmacytoid DCs). However, these groups are so rare, they are difficult to distinguish from background noise for a dataset of this size without prior knowledge.
+We encourage users to repeat downstream analyses with a different number of PCs (10, 15, or even 50!). As you will observe, the results often do not differ dramatically.
+We advise users to err on the higher side when choosing this parameter. For example, performing downstream analyses with only 5 PCs does signifcanltly and adversely affect results.
