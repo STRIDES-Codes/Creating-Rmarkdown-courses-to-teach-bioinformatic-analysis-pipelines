@@ -1,5 +1,4 @@
 # Creating-Rmarkdown-courses-to-teach-bioinformatic-analysis-pipelines
-Team members:
-Yi-Han Hu
+Rmarkdown - Seurat application incorporating with LearnR (From “Standard pre-processing workflow” to “Determine the 'dimensionality' of the dataset”)
 
 
