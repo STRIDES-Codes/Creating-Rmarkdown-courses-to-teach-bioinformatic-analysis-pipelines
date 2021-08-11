@@ -8,3 +8,10 @@ main
 =======
 YHH-part
 Rmarkdown - Seurat application incorporating with LearnR (From “Standard pre-processing workflow” to “Determine the 'dimensionality' of the dataset”)
+
+
+What's the problem?
+Why should we solve it?
+What is Seurat?
+How to use this course:
+Any files/data/screenshots
