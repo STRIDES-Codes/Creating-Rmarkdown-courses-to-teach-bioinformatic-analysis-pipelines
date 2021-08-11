@@ -92,7 +92,7 @@ pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 #meta.data refers to the information on the data, provides more context on the data
 #orig.ident - refers to the data of ~3,000 PBMCs samples from a healthy donor
 #nCount_RNA - total number of RNA molecules detected within a cell
-#ure_RNA - total number of genes in each cell
+#nFeature_RNA - total number of genes in each cell
 #percent.mt - percent of mitochondrial genes within each cell
 head(pbmc@meta.data, 5)
 
@@ -103,7 +103,7 @@ head(pbmc@meta.data, 5)
 
 # Visualize QC metrics as a violin plot
 #Violin plots are similar to box plots, except they also provide the probability density of the data at different values
-VlnPlot(pbmc, features = c("ure_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+VlnPlot(pbmc, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 
 ```
 
@@ -114,7 +114,7 @@ VlnPlot(pbmc, features = c("ure_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 
 # the title of the plot displays the correlation between the two features
 plot1 <- FeatureScatter(pbmc, feature1 = "nCount_RNA", feature2 = "percent.mt")
-plot2 <- FeatureScatter(pbmc, feature1 = "nCount_RNA", feature2 = "ure_RNA")
+plot2 <- FeatureScatter(pbmc, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 plot1 + plot2
 ```
 
@@ -126,7 +126,7 @@ plot1 + plot2
 #We filter cells that have unique feature counts over 2,500 or less than 200
 #We filter cells that have >5% mitochondrial counts
 
-pbmc <- subset(pbmc, subset = ure_RNA > 200 & ure_RNA < 2500 & percent.mt < 5)
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
 ```
 
 
