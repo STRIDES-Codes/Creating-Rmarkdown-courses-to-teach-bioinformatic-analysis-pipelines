@@ -19,18 +19,16 @@ As a proof of concept, we created a course to teach single cell RNA sequencing a
 
 
 What is Seurat?
-scRNA overview
-seurat overview
+
 
 
 How to use this course:
 
+RNA sequencing (RNA-seq) is a genomic approach for the detection and quantitative analysis of messenger RNA molecules in a biological sample and is useful for studying cellular responses. Single cell RNA sequencing (scRNA-seq) permits comparison of the transcriptomes of individual cells thus allowing for transcriptional comparisons and providing information about heterogeneity within cell populations. 
+
+Seurat is an R package designed for quality control, analysis, and exploration of scRNA-seq data.
 
 
-
-
-Develop interactive Rmarkdown tutorial to teach analysis of single cell RNA sequencing (scRNA) based on Seurat guided clustering tutorial
-Ensure that tutorial is accessible and useful for someone with limited knowledge/understanding/experience of R and single cell RNA sequencing
-Show proof of concept for further course development with this structure
+https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-017-0467-4
 
 Any files/data/screenshots
