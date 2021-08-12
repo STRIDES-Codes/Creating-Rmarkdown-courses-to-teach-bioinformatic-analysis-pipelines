@@ -64,14 +64,12 @@ pbmc <- RunUMAP(pbmc, dims = 1:10)
 pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 ```
 
-
 ```{r raw_data, include=FALSE}
 example.url <- "https://github.com/STRIDES-Codes/Creating-Rmarkdown-courses-to-teach-bioinformatic-analysis-pipelines/blob/main/Data/pbmc3k_filtered_gene_bc_matrices.tar.gz?raw=true"
 con <- file(example.url, open = "rb")
 gzcon_con <- gzcon(con)
 untar(gzcon_con, exdir = paste(getwd(), "/temp_dir/", sep =""))
 
-# need to link to the data directory in the github
 pbmc.data <- Read10X(data.dir = paste(getwd(), "/temp_dir/filtered_gene_bc_matrices/hg19/", sep =""))
 # Initialize the Seurat object with the raw (non-normalized data).
 suppressWarnings({pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)})
@@ -125,6 +123,7 @@ pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 ## Setup the Seurat Object
 In this tutorial, we will be repurposing the existing datasets. We will analyze **Peripheral Blood Mononuclear Cells (PBMC)** dataset which is freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
 
+
 We start by reading in the data. The Read10X function reads in the output of the [cellranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) pipeline from 10X, returning a **unique molecular identified (UMI)** count matrix. The values in this matrix represent the number of molecules for each feature (i.e. gene; row) that are detected in each cell (column).
 
 We next use the **count matrix** to create a Seurat object. The Seurat object is a representation of single-cell expression data for R. The object serves as a container that contains both data (like the count matrix) and analysis (like **PCA**, or clustering results) for a single-cell dataset. For a technical discussion of the Seurat object structure, check out the [Seurat GitHub Wiki](https://github.com/satijalab/seurat/wiki). For example, the count matrix is stored in pbmc[["RNA"]]@counts.
@@ -137,6 +136,7 @@ We next use the **count matrix** to create a Seurat object. The Seurat object is
   <details>
   <summary> Peripheral Blood Mononuclear Cells (PBMC) </summary>
   PBMCs are blood cells with round nuclei that encompass a heterogeneous cell (mixture of different cell types) population comprising various frequencies of lymphocytes (T cells, B cells, and NK cells), dendritic cells, and monocytes. These cells are critical components of our immune system (innate and adaptive) which defends the body against viral, bacterial, and parasitic infection and destroys tumor cells and foreign substances.[2]
+
   </details>
   <details>
   <summary> Principle Component Analysis(PCA) </summary>
@@ -145,6 +145,7 @@ We next use the **count matrix** to create a Seurat object. The Seurat object is
   <details>
   <summary> Unique Molecular Identified (UMI) </summary>
   UMIs are short barcode sequences used to uniquely tag each RNA molecule added to sequencing libraries before any PCR amplification steps, enabling the accurate bioinformatic identification of PCR duplicates, reducing the rate of false-positive variant calls and increase sensitivity of variant detection.[4]
+
   </details>
 
   References:
@@ -175,6 +176,7 @@ There are 13714 features across the 2700 samples within 1 single-cell RNA seq as
 ```{r load_data, exercise = TRUE, exercise.eval = FALSE, warning=FALSE}
 # Load the PBMC dataset (dataset has been downloaded and stored in a temp foloder)
 pbmc.data <- Read10X(data.dir = data_dir_temp)
+
 
 # Initialize the Seurat object with the raw (non-normalized data).
 pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
@@ -474,6 +476,7 @@ pbmc <- ScaleData(pbmc, features = all.genes)
 Next we perform PCA on the scaled data. By default, only the previously determined variable features are used as input, but can be defined using features argument if you wish to choose a different subset.
 
 ```{r PCA, exercise = FALSE, results='hide', message=FALSE}
+
 pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
 ```
 
@@ -527,11 +530,13 @@ To overcome the extensive technical noise in any single feature for scRNA-seq da
 
 In [Macosko et al](http://www.cell.com/abstract/S0092-8674(15)00549-8), we implemented a resampling test inspired by the **JackStraw** procedure. We randomly permute a subset of the data (1% by default) and rerun PCA, constructing a 'null distribution' of feature scores, and repeat this procedure. We identify 'significant' PCs as those who have a strong enrichment of low p-value features.
 
+
 <details>
 <summary> JackStraw </summary>
 
 ```{r PCA_dim_reduction, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE}
 # NOTE: This process can take a long time for big datasets. 
+
 pbmc <- JackStraw(pbmc, num.replicate = 50)
 pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
 
@@ -541,6 +546,7 @@ JackStrawPlot(pbmc, dims = 1:15)
 
 'Significant' PCs will show a strong enrichment of features with low p-values (solid curve above the dashed line). In this case it appears that there is a sharp drop-off in significance after the first 10-12 PCs.
 </details>
+
 
 
 
