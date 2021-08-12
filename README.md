@@ -45,8 +45,13 @@ We will continue improving the functionality of this course in response to feedb
 # **Team Members: 
 
 Binod Regmi
+
 Matt Moss
+
 Tasmine Clement
+
 Shani Gelles
+
 Yi-Han Hu
+
 Md A Rahman
