@@ -416,7 +416,7 @@ top10
 
 ### Plot variable features with and without labels
 
-```{r plot_features, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE, fig.dim = c(8, 6)}
+```{r plot_features, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE, fig.dim = c(10, 10), warning = FALSE}
 plot1 <- VariableFeaturePlot(pbmc)
 plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
 plot1 + plot2
@@ -442,7 +442,7 @@ pbmc <- ScaleData(pbmc, features = all.genes)
 ## Linear dimensional reduction
 Next we perform PCA on the scaled data. By default, only the previously determined variable features are used as input, but can be defined using features argument if you wish to choose a different subset.
 
-```{r PCA, exercise = FALSE}
+```{r PCA, exercise = FALSE, results='hide'}
 pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
 ```
 
@@ -621,13 +621,15 @@ head(cluster5.markers, n = 5)
 
 ### Find markers for every cluster compared to all remaining cells, report only the positive ones
 
-```{r marker_all, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE}
+```{r marker_all, exercise = FALSE}
 # find markers for every cluster compared to all remaining cells, report only the positive ones
 pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
-pbmc.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC) # avg_logFC is not found. To make it run, you have to remove ", wt = avg_logFC"
-
 ```
 
+Show the top 2 clusters based on ???
+```{r marker_all, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE}
+pbmc.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC) # avg_logFC is not found. To make it run, you have to remove ", wt = avg_logFC"
+```
 
 ## Visualizing cluster specific markers
 
