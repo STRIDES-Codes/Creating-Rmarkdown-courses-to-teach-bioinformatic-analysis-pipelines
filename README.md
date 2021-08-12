@@ -42,7 +42,7 @@ Students will be provided an opportunity to test their newly acquired knowledge 
 
 We will continue improving the functionality of this course in response to feedback from students. Next we will add courses following this interactive format.
 
-# **Team Members: 
+# **Team Members:**
 
 Binod Regmi
 
