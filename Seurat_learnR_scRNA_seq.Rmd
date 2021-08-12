@@ -16,9 +16,16 @@ library(patchwork)
 tutorial_options(exercise.timelimit = 120)
 knitr::opts_chunk$set(error = TRUE)
 
+# Downloading data from github
+example.url <- "https://github.com/STRIDES-Codes/Creating-Rmarkdown-courses-to-teach-bioinformatic-analysis-pipelines/blob/main/Data/pbmc3k_filtered_gene_bc_matrices.tar.gz?raw=true"
+con <- file(example.url, open = "rb")
+gzcon_con <- gzcon(con)
+untar(gzcon_con, exdir = paste(getwd(), "/temp_dir/", sep =""))
+
+data_dir_temp <- paste(getwd(), "/temp_dir/filtered_gene_bc_matrices/hg19/", sep ="")
+
 # Loading data
-# need to link to the data directory in the github
-pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+pbmc.data <- Read10X(data.dir = data_dir_temp)
 # Initialize the Seurat object with the raw (non-normalized data).
 suppressWarnings({pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)})
 
@@ -58,8 +65,12 @@ pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.thre
 ```
 
 ```{r raw_data, include=FALSE}
-# need to link to the data directory in the github
-pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+example.url <- "https://github.com/STRIDES-Codes/Creating-Rmarkdown-courses-to-teach-bioinformatic-analysis-pipelines/blob/main/Data/pbmc3k_filtered_gene_bc_matrices.tar.gz?raw=true"
+con <- file(example.url, open = "rb")
+gzcon_con <- gzcon(con)
+untar(gzcon_con, exdir = paste(getwd(), "/temp_dir/", sep =""))
+
+pbmc.data <- Read10X(data.dir = paste(getwd(), "/temp_dir/filtered_gene_bc_matrices/hg19/", sep =""))
 # Initialize the Seurat object with the raw (non-normalized data).
 suppressWarnings({pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)})
 
@@ -69,29 +80,49 @@ pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 
 
 ## Single Cell RNA (scRNA) sequencing 
-  - Explanation of scRNA sequencing: 
-    - Central dogma 
-    - Differences between bulk and single cell RNA seq
-        - Question - sort some of the items on the powerpoint into columns 
-    - Explain RNA sequencing
+  - scRNA sequencing
     - Explore gene expression at single cell level
-  - Biology at each step of seurat processing pipeline
+    - Central dogma
+    ![Central Dogma](https://github.com/STRIDES-Codes/Creating-Rmarkdown-courses-to-teach-bioinformatic-analysis-pipelines/blob/main/Screenshots/central_dogma.gif?raw=true)[source](https://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/MolBioReview/central_dogma.html)
+    The Central Dogma explains the flow of genetic information from DNA to RNA to proteins. Protein production in a living cell consitis of two processes- transcription and translation. In transcription, the information in the double helical DNA of cells is converted into single stranded RNA, and during translation RNA is “read” to make proteins composed of amino acids.
+    - RNA sequencing
+      - A high-throughput sequencing method to provide insight into the transcriptome of a cell. Compared to the traditional sequencing such as sanger sequencing, RNA sequencing  provides far higher coverage and greater resolution of the dynamic nature of the transcriptome.
+      - Introduction [video](https://www.youtube.com/watch?v=tlf6wYJrwKY)
+    - Differences between bulk and single cell RNA seq
+        - The main difference between bulk and single cell RNA-seq is that each sequencing library represents a single cell, instead of a population of cells. 
+        - Bulk-RNA-seq averages gene expression across all cells in a sample while scRNA-seq proﬁles the transcriptome of each individual cell in the tissue sample. 
+        - scRNA-seq is  able to identify signiﬁcant heterogeneity of phenotypes within individual cell subtype populations. 
+    - Biology at each step of [Seurat Processing Pipeline](https://satijalab.org/seurat/archive/v3.2/pbmc3k_tutorial.html)
 
-Central Dogma:
-![Central Dogma](path-to-image-here)
-The Central Dogma explains the flow of genetic information from DNA to RNA to proteins. Protein production in a living cell consitis of two processes- transcription and translation. In transcription, the information in the double helical DNA of cells is converted into single stranded RNA, and during translation RNA is “read” to make proteins composed of amino acids.
 
 <details>
 <summary> More details about scRNA sequencing </summary>
   1. [Quick overview in video](https://www.khanacademy.org/science/in-in-class-12-biology-india/xc09ed98f7a9e671b:in-in-the-molecular-basis-of-inheritance/xc09ed98f7a9e671b:in-in-transcription-and-rna-processing/v/central-dogma-of-molecular-biology-2)
   2. [Quick overview in text](https://www.khanacademy.org/science/in-in-class-12-biology-india/xc09ed98f7a9e671b:in-in-the-molecular-basis-of-inheritance/xc09ed98f7a9e671b:in-in-transcription-and-rna-processing/a/intro-to-gene-expression-central-dogma)
   3. [Central Dogma](https://www.yourgenome.org/facts/what-is-the-central-dogma)
+  4. [RNA Sequencing and Analysis](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4863231/)
+</details>
+
+<details>
+<summary> Differences between bulk and scRNA seq </summary>
+  - Bulk
+    - Higher sequencing depth allows exploration of more genes
+    - Unable to distinguish gene expression changes due to tissue composition changes
+    - Tissues sequenced should be as homogenous as possible
+    - For heterogeneous tissues, may be beneficial to FACS sort and sequence the different cell types separately
+    - Lower cost and ease of preparation allow for more samples to be analyzed
+    - More conditions can be studied
+    - More replicates can be used to ensure significance of results
+  - Single Cell
+    - Allows for exploration of heterogeneity in your tissue of interest
+    - Allows for discovery of rare cell types
+    - Due to high cost, removing batch effects can be a substantial problem
 </details>
 
 
-
 ## Setup the Seurat Object
-In this tutorial, we will be repurposing the existing datasets. We will analyze **Peripheral Blood Mononuclear Cells (PBMC)** dataset freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
+In this tutorial, we will be repurposing the existing datasets. We will analyze **Peripheral Blood Mononuclear Cells (PBMC)** dataset which is freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
+
 
 We start by reading in the data. The Read10X function reads in the output of the [cellranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) pipeline from 10X, returning a **unique molecular identified (UMI)** count matrix. The values in this matrix represent the number of molecules for each feature (i.e. gene; row) that are detected in each cell (column).
 
@@ -104,7 +135,8 @@ We next use the **count matrix** to create a Seurat object. The Seurat object is
   </details>
   <details>
   <summary> Peripheral Blood Mononuclear Cells (PBMC) </summary>
-  PBMCs are blood cells with round nuclei that encompass a heterogeneous cell ( mixture of different cell types) population comprising various frequencies of lymphocytes (T cells, B cells, and NK cells), dendritic cells, and monocytes. These cells are critical components of our immune system(innate and adaptive) which defends the body against viral, bacterial, and parasitic infection and destroys tumor cells and foreign substances.[2]
+  PBMCs are blood cells with round nuclei that encompass a heterogeneous cell (mixture of different cell types) population comprising various frequencies of lymphocytes (T cells, B cells, and NK cells), dendritic cells, and monocytes. These cells are critical components of our immune system (innate and adaptive) which defends the body against viral, bacterial, and parasitic infection and destroys tumor cells and foreign substances.[2]
+
   </details>
   <details>
   <summary> Principle Component Analysis(PCA) </summary>
@@ -112,7 +144,8 @@ We next use the **count matrix** to create a Seurat object. The Seurat object is
   </details>
   <details>
   <summary> Unique Molecular Identified (UMI) </summary>
-  UMIs are short barcode sequences used to uniquely tag each RNA molecule added to sequencing libraries before any PCR amplification steps, enabling the accurate bioinformatic identification of PCR duplicates, reduce the rate of false-positive variant calls and increase sensitivity of variant detection.[4]
+  UMIs are short barcode sequences used to uniquely tag each RNA molecule added to sequencing libraries before any PCR amplification steps, enabling the accurate bioinformatic identification of PCR duplicates, reducing the rate of false-positive variant calls and increase sensitivity of variant detection.[4]
+
   </details>
 
   References:
@@ -141,9 +174,9 @@ The raw data includes information on 2,700 Peripheral Blood Mononuclear Cells (P
 There are 13714 features across the 2700 samples within 1 single-cell RNA seq assay.
 
 ```{r load_data, exercise = TRUE, exercise.eval = FALSE, warning=FALSE}
-# Load the PBMC dataset
-# Make sure the data directory is correct
-pbmc.data <- Read10X(data.dir = "G:/Hank/Google Drive/Projects/SIP codeathone/filtered_gene_bc_matrices/hg19/")
+# Load the PBMC dataset (dataset has been downloaded and stored in a temp foloder)
+pbmc.data <- Read10X(data.dir = data_dir_temp)
+
 
 # Initialize the Seurat object with the raw (non-normalized data).
 pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
@@ -442,7 +475,8 @@ pbmc <- ScaleData(pbmc, features = all.genes)
 ## Linear dimensional reduction
 Next we perform PCA on the scaled data. By default, only the previously determined variable features are used as input, but can be defined using features argument if you wish to choose a different subset.
 
-```{r PCA, exercise = FALSE, results='hide'}
+```{r PCA, exercise = FALSE, results='hide', message=FALSE}
+
 pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
 ```
 
@@ -486,7 +520,7 @@ DimHeatmap(pbmc, dims = 1, cells = 500, balanced = TRUE)
 ```
 
 ```{r heatmap_ex1-solution}
-### Visualize PCA results against Gene expression (results for the first 15 PCs)
+### Visualize PCA results against Gene expression (results for the first 6 PCs)
 DimHeatmap(pbmc, dims = 1:6, cells = 500, balanced = TRUE)
 ```
 
@@ -494,14 +528,15 @@ DimHeatmap(pbmc, dims = 1:6, cells = 500, balanced = TRUE)
 ### Determine the 'dimensionality' of the dataset
 To overcome the extensive technical noise in any single feature for scRNA-seq data, Seurat clusters cells based on their PCA scores, with each PC essentially representing a 'metafeature' that combines information across a correlated feature set. The top principal components therefore represent a robust compression of the dataset. However, how many componenets should we choose to include? 10? 20? 100?
 
-In Macosko et al, we implemented a resampling test inspired by the **JackStraw** procedure. We randomly permute a subset of the data (1% by default) and rerun PCA, constructing a 'null distribution' of feature scores, and repeat this procedure. We identify 'significant' PCs as those who have a strong enrichment of low p-value features.
+In [Macosko et al](http://www.cell.com/abstract/S0092-8674(15)00549-8), we implemented a resampling test inspired by the **JackStraw** procedure. We randomly permute a subset of the data (1% by default) and rerun PCA, constructing a 'null distribution' of feature scores, and repeat this procedure. We identify 'significant' PCs as those who have a strong enrichment of low p-value features.
+
 
 <details>
 <summary> JackStraw </summary>
 
 ```{r PCA_dim_reduction, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE}
-# NOTE: This process can take a long time for big datasets, comment out for expediency. 
-# More approximate techniques such as those implemented in ElbowPlot() can be used to reduce computation time
+# NOTE: This process can take a long time for big datasets. 
+
 pbmc <- JackStraw(pbmc, num.replicate = 50)
 pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
 
@@ -510,8 +545,9 @@ JackStrawPlot(pbmc, dims = 1:15)
 ```
 
 'Significant' PCs will show a strong enrichment of features with low p-values (solid curve above the dashed line). In this case it appears that there is a sharp drop-off in significance after the first 10-12 PCs.
-
 </details>
+
+
 
 
 An alternative heuristic method generates an 'Elbow plot': a ranking of principle components based on the percentage of variance explained by each one (ElbowPlot function). Click continue to check it out!
@@ -530,9 +566,11 @@ Identifying the true dimensionality of a dataset -- can be challenging/uncertain
 
 We chose 10 here, but encourage users to consider the following:
 
-Dendritic cell and NK aficionados may recognize that genes strongly associated with PCs 12 and 13 define rare immune subsets (i.e. MZB1 is a marker for plasmacytoid DCs). However, these groups are so rare, they are difficult to distinguish from background noise for a dataset of this size without prior knowledge.
-We encourage users to repeat downstream analyses with a different number of PCs (10, 15, or even 50!). As you will observe, the results often do not differ dramatically.
-We advise users to err on the higher side when choosing this parameter. For example, performing downstream analyses with only 5 PCs does signifcanltly and adversely affect results.
+  - Dendritic cell and NK aficionados may recognize that genes strongly associated with PCs 12 and 13 define rare immune subsets (i.e. MZB1 is a marker for plasmacytoid DCs). However, these groups are so rare, they are difficult to distinguish from background noise for a dataset of this size without prior knowledge.
+
+  - We encourage users to repeat downstream analyses with a different number of PCs (10, 15, or even 50!). As you will observe, the results often do not differ dramatically.
+
+  - We advise users to err on the higher side when choosing this parameter. For example, performing downstream analyses with only 5 PCs does signifcanltly and adversely affect results.
 
 
 ## Cluster the cells
@@ -567,17 +605,23 @@ pbmc <- RunUMAP(pbmc, dims = 1:10)
 ```
 
 ### Plot with labels
+
 ```{r UMAP_label, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE, fig.dim = c(8, 6)}
 # note that you can set `label = TRUE` or use the LabelClusters function to help label
 # individual clusters
 DimPlot(pbmc, reduction = "umap")
 ```
 
+The axis represents the expression of one gene and each point in the plot represents a cell.
+
 ### Exercise 
 Try to use `tSNE` method and make a plot.
+
 ```{r UMAP_ex1, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE, fig.dim = c(8, 6)}
 
 ```
+
+Likewise, `tSNE` maps a set of high-dimensional points to two dimensions, such that ideally, close neighbors remain close and distant points remain distant.
 
 ```{r UMAP_ex1-solution}
 ### Visualize PCA results against Gene expression (results for the first 15 PCs)
@@ -585,21 +629,26 @@ pbmc <- RunTSNE(pbmc, dims = 1:10)
 DimPlot(pbmc, reduction = "tsne")
 ```
 
-### Saving plot
-You can save the object at this point so that it can easily be loaded back in without having to rerun the computationally intensive steps performed above, or easily shared with collaborators.
+<!-- ### Saving plot -->
+<!-- You can save the object at this point so that it can easily be loaded back in without having to rerun the computationally intensive steps performed above, or easily shared with collaborators. -->
 
-```{r UMAP_plot_save, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE}
-saveRDS(pbmc, file = "../output/pbmc_tutorial.rds")
-```
+<!-- ```{r UMAP_plot_save, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE} -->
+<!-- saveRDS(pbmc, file = "../output/pbmc_tutorial.rds") -->
+<!-- ``` -->
 
 ## Identify cluster biomarkers
 
 ### Finding differentially expressed features (cluster biomarkers)
 
-Seurat can help you find markers that define clusters via differential expression. By default, it identifes positive and negative markers of a single cluster (specified in ident.1), compared to all other cells. FindAllMarkers automates this process for all clusters, but you can also test groups of clusters vs. each other, or against all cells.
+Seurat can help you find markers that define clusters via **differential expression**. By default, it identifes positive and negative markers of a single cluster (specified in ident.1), compared to all other cells. FindAllMarkers automates this process for all clusters, but you can also test groups of clusters vs. each other, or against all cells.
 
 The min.pct argument requires a feature to be detected at a minimum percentage in either of the two groups of cells, and the thresh.test argument requires a feature to be differentially expressed (on average) by some amount between the two groups. You can set both of these to 0, but with a dramatic increase in time - since this will test a large number of features that are unlikely to be highly discriminatory. As another option to speed up these computations, max.cells.per.ident can be set. This will downsample each identity class to have no more cells than whatever this is set to. While there is generally going to be a loss in power, the speed increases can be significiant and the most highly differentially expressed features will likely still rise to the top.
 
+
+<details>
+<summary> Differential expression </summary>
+The goal of differential expression testing is to determine which genes are expressed at different levels between conditions. These genes can offer biological insight into the processes affected by the condition(s) of interest.
+</details>
 
 ### Find all markers of cluster 1
 
@@ -626,9 +675,9 @@ head(cluster5.markers, n = 5)
 pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 ```
 
-Show the top 2 clusters based on ???
-```{r marker_all, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE}
-pbmc.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC) # avg_logFC is not found. To make it run, you have to remove ", wt = avg_logFC"
+Show the top 2 clusters
+```{r marker_all_top, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE}
+pbmc.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_log2FC)
 ```
 
 ## Visualizing cluster specific markers
@@ -666,12 +715,14 @@ FeaturePlot(pbmc, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3
 `DoHeatmap` generates an expression heatmap for given cells and features. In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.
 
 ```{r marker_p5, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE, fig.dim = c(9, 9)}
-top10 <- pbmc.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC) # avg_logFC is not found. To make it run, you have to remove ", wt = avg_logFC"
+top10 <- pbmc.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_log2FC)
 DoHeatmap(pbmc, features = top10$gene) + NoLegend()
 ```
 
 
 ## Assigning cell type identity to clusters
+
+Fortunately in the case of this dataset, we can use canonical markers to easily match the unbiased clustering to known cell types:
 
 ```{r assign, exercise = TRUE, exercise.setup="setup",  exercise.eval = FALSE, fig.dim = c(8, 6)}
 new.cluster.ids <- c("Naive CD4 T", "Memory CD4 T", "CD14+ Mono", "B", "CD8 T", "FCGR3A+ Mono", "NK", "DC", "Platelet")
@@ -680,3 +731,30 @@ pbmc <- RenameIdents(pbmc, new.cluster.ids)
 DimPlot(pbmc, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
 ```
 
+
+- Description of different cell types:
+    - <details> <summary> Naïve T cells </summary> 
+    Naïve T cells are precursors for effector and memory T cell subsets. Phenotypically, naïve T cells are small cells with little cytoplasm.[1] </details>
+    - <details> <summary> Memory CD4+ </summary> 
+    Check the reference #2 below. </details>
+    - <details> <summary> CD14+ monocytes </summary> 
+    CD14+ monocytes are responsible for phagocytosis of foreign substances in the body and are capable of killing infected host cells via antibody-mediated cellular cytotoxicity. </details>
+    - <details> <summary> B cell </summary> 
+    Check the reference #3 below. </details>
+    - <details> <summary> CD8+ T cell </summary> 
+    Check the reference #4 below. </details>
+    - <details> <summary> NK cell </summary> 
+    Check the reference #5 below. </details>
+    - <details> <summary> DC cell </summary> 
+    Check the reference #6 below. </details>
+  
+Ref: 
+[[1](http://sciencedirect.com/topics/biochemistry-genetics-and-molecular-biology/naive-t-cell)]
+[[2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2679806/)]
+[[3](https://ashpublications.org/blood/article/112/5/1570/25424/B-lymphocytes-how-they-develop-and-function)]
+[[4](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5508124/)]
+[[5](https://www.frontiersin.org/articles/10.3389/fimmu.2017.01124/full)]
+[[6](https://www.frontiersin.org/articles/10.3389/fimmu.2019.01306/full)]
+
+## The END
+This is the end of the tutorial.
