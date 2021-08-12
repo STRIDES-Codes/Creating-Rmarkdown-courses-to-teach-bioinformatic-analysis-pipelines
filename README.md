@@ -12,22 +12,15 @@ Rmarkdown - Seurat application incorporating with LearnR (From “Standard pre-p
 
 What's the problem?
 
-It can be difficult for bioinformaticians to learn data processing and analyzing for different methodologies. There are often many different tools, and it is not always obvious which is the most efficient/effective/tailored to that model/accurate. Despite bioinformatics being increasingly essential to biological sciences, programming is often not adequately taught in undergraduate and graduate biology classes. people pick it up piecemeal 
+It can be difficult for bioinformaticians to learn data processing and analyzing for different methodologies. There are often many different tools, and it is not always straightforward to determine which is the most effectively tailored to the model at hand. Despite bioinformatics being increasingly essential across the biological sciences, programming is often not adequately taught in undergraduate and graduate biology programs. Therefore, scientists in this field learn aspects of bioinformatics in a piecemeal manner, and may miss important lessons that will improve their workflow, analysis, and overall research.
+
+How are we solving the problem?
+
+Using the existing infrastructure of LearnR, we set out to create courses to teach standard reproducible bioinformatic pipelines. Our intent is that these courses are interactive and computationally light, thus allowing users to fully understand the necessary biology and bioinformatics as they develop their skills and expand their knowledge base. The structure we used gives users the option to assess their own background understanding, and move through the courses at their own pace - they can access the provided additional resources when they need. The courses also break the pipeline into small steps while providing interactive exercises with feedback, so users do not get lost and are able to apply what they learn to their own work. 
+
+As a proof of concept, we created a course to teach single cell RNA sequencing analysis using the Seurat package in R. 
 
 
-Bioinformatic data analysis pipelines can be difficult for beginners to learn
-Many different tools do the same task. Which is best?
-Programming is often not taught in undergraduate biology, despite R being a popular tool for bioinformatics
-We set out to create an interactive, computationally light way to teach bioinformatics to beginners
-
-How should we solve it?
-Using the existing infrastructure of LearnR, we set out to create courses to teach standard reproducible bioinformatic pipelines. 
-flexibility for interactivity
-determine amount of background knowledge they have/need
-we can provide additional resources, break it down into small steps with feedback
-proof of concept by teaching scRNA sequencing analysis using seurat
-
-existing infrastructure of teaching R in R, repuposing teaching tools in R for bioinformatics
 
 What is Seurat?
 scRNA overview
@@ -36,5 +29,12 @@ seurat overview
 
 How to use this course:
 
+
+
+
+
+Develop interactive Rmarkdown tutorial to teach analysis of single cell RNA sequencing (scRNA) based on Seurat guided clustering tutorial
+Ensure that tutorial is accessible and useful for someone with limited knowledge/understanding/experience of R and single cell RNA sequencing
+Show proof of concept for further course development with this structure
 
 Any files/data/screenshots
