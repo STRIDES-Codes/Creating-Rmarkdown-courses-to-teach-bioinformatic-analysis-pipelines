@@ -79,7 +79,7 @@ pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 
 Central Dogma:
 ![Central Dogma](path-to-image-here)
-The Central Dogma explains the flow of genetic information from DNA to RNA to proteins. In transcription, the information in the double helical DNA of cells is converted into single stranded RNA, and during translation RNA is “read” to make proteins composed of amino acids.
+The Central Dogma explains the flow of genetic information from DNA to RNA to proteins. Protein production in a living cell consitis of two processes- transcription and translation. In transcription, the information in the double helical DNA of cells is converted into single stranded RNA, and during translation RNA is “read” to make proteins composed of amino acids.
 
 <details>
 <summary> More details about scRNA sequencing </summary>
@@ -91,11 +91,11 @@ The Central Dogma explains the flow of genetic information from DNA to RNA to pr
 
 
 ## Setup the Seurat Object
-For this tutorial, we will be analyzing the a dataset of **Peripheral Blood Mononuclear Cells (PBMC)** freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
+In this tutorial, we will be repurposing the existing datasets. We will analyze **Peripheral Blood Mononuclear Cells (PBMC)** dataset freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
 
 We start by reading in the data. The Read10X function reads in the output of the [cellranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) pipeline from 10X, returning a **unique molecular identified (UMI)** count matrix. The values in this matrix represent the number of molecules for each feature (i.e. gene; row) that are detected in each cell (column).
 
-We next use the **count matrix** to create a Seurat object. The object serves as a container that contains both data (like the count matrix) and analysis (like **PCA**, or clustering results) for a single-cell dataset. For a technical discussion of the Seurat object structure, check out the [Seurat GitHub Wiki](https://github.com/satijalab/seurat/wiki). For example, the count matrix is stored in pbmc[["RNA"]]@counts.
+We next use the **count matrix** to create a Seurat object. The Seurat object is a representation of single-cell expression data for R. The object serves as a container that contains both data (like the count matrix) and analysis (like **PCA**, or clustering results) for a single-cell dataset. For a technical discussion of the Seurat object structure, check out the [Seurat GitHub Wiki](https://github.com/satijalab/seurat/wiki). For example, the count matrix is stored in pbmc[["RNA"]]@counts.
 
 - Glossary
   <details>
@@ -104,7 +104,7 @@ We next use the **count matrix** to create a Seurat object. The object serves as
   </details>
   <details>
   <summary> Peripheral Blood Mononuclear Cells (PBMC) </summary>
-  PBMCs are blood cells with round nuclei that encompass a heterogeneous cell population comprising various frequencies of lymphocytes (T cells, B cells, and NK cells), dendritic cells, and monocytes. These cells are critical components of the innate and adaptive immune system which defends the body against viral, bacterial, and parasitic infection and destroys tumor cells and foreign substances.[2]
+  PBMCs are blood cells with round nuclei that encompass a heterogeneous cell ( mixture of different cell types) population comprising various frequencies of lymphocytes (T cells, B cells, and NK cells), dendritic cells, and monocytes. These cells are critical components of our immune system(innate and adaptive) which defends the body against viral, bacterial, and parasitic infection and destroys tumor cells and foreign substances.[2]
   </details>
   <details>
   <summary> Principle Component Analysis(PCA) </summary>
@@ -112,7 +112,7 @@ We next use the **count matrix** to create a Seurat object. The object serves as
   </details>
   <details>
   <summary> Unique Molecular Identified (UMI) </summary>
-  UMIs are complex indices added to sequencing libraries before any PCR amplification steps, enabling the accurate bioinformatic identification of PCR duplicates. These molecular barcodes are short sequences used to uniquely tag each molecule in a sample library.[4]
+  UMIs are short barcode sequences used to uniquely tag each RNA molecule added to sequencing libraries before any PCR amplification steps, enabling the accurate bioinformatic identification of PCR duplicates, reduce the rate of false-positive variant calls and increase sensitivity of variant detection.[4]
   </details>
 
   References:
@@ -242,7 +242,7 @@ Seurat allows you to easily explore QC metrics and filter cells based on any use
 
 <details> 
 <summary> Mitochondrial content </summary>
-Mitochondrial content is known to interact with the nuclear genome, drive alternative splicing, and regulate nuclear gene expression, and is also associated with cancer, degenerative diseases, and aging (Guantes et al. 2015; Muir et al. 2016). High numbers of mitochondrial transcripts are indicators of cell stress, and therefore mtDNA% is a measurement associated with apoptotic, stressed, low-quality cells (Zhao et al. 2002; Ilicic et al. 2016; Lun et al. 2016). However, mtDNA% threshold depends highly on the tissue type and the questions being investigated.[1]
+Mitochondrial content is known to interact with the nuclear genome, drive alternative splicing (a process that allows the coding regions to be put together in different ways to generate multiple proteins), and regulate nuclear gene expression, and is also associated with cancer, degenerative diseases, and aging (Guantes et al. 2015; Muir et al. 2016). High numbers of mitochondrial transcripts are indicators of cell stress, and therefore mtDNA% is a measurement associated with programmed cell death, stressed, low-quality cells (Zhao et al. 2002; Ilicic et al. 2016; Lun et al. 2016). However, mtDNA% threshold depends highly on the tissue type and the questions being investigated.[1]
 
 Ref: [[1](https://www.biorxiv.org/content/10.1101/2020.02.20.958793v1.full)]
 </details>
