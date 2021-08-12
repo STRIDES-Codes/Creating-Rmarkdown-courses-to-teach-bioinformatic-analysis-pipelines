@@ -1,0 +1,3 @@
+For this tutorial, we will be analyzing the a dataset of **Peripheral Blood Mononuclear Cells (PBMC)** freely available from 10X Genomics. 
+There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. 
+The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
